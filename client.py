@@ -1,7 +1,11 @@
+# ===== Third-party libraries (need pip install) =====
+# pip install watchdog
+from watchdog.observers import Observer
+from watchdog.events import FileSystemEventHandler
+
+# ===== Python standard library (NO pip install needed) =====
 from fileinput import filename
 from xmlrpc import client
-from watchdog.observers import Observer #pip install watchdog
-from watchdog.events import FileSystemEventHandler
 import time
 import socket
 import json

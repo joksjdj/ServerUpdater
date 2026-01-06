@@ -22,14 +22,21 @@ def create_and_delete(file_path, action, subaction):
         elif subaction == "folder_deleted":
             shutil.rmtree(file_path, ignore_errors=True)
 
-def recv_all(sock):
+def recv_json(sock):
+    header = sock.recv(4)
+    if not header:
+        return None
+
+    msg_len = int.from_bytes(header, "big")
+
     data = b""
-    while True:
+    while len(data) < msg_len:
         packet = sock.recv(4096)
         if not packet:
-            break
+            return None
         data += packet
-    return data
+
+    return json.loads(data.decode())
 
 HOST = "0.0.0.0"
 PORT = 5000
@@ -43,11 +50,11 @@ conn, addr = server.accept()
 print("Connected by", addr)
 
 while True:
-    data = recv_all(conn)
-    if not data:
+    received_array = recv_json(conn)
+    if received_array is None:
         break
-    received_array = json.loads(data.decode())
-    print("Received array:", received_array)
+
+    print("Received:", received_array)
 
     action = received_array.get("action")
     subaction = received_array.get("subaction")
@@ -56,7 +63,6 @@ while True:
     if action in ["create", "delete"]:
         create_and_delete(path, action, subaction)
     elif action == "edit":
-        filedata = received_array.get("filedata")
-        edit(path, filedata)
+        edit(path, received_array.get("filedata"))
 
-    conn.sendall(b"Message received")
+    conn.sendall(b"OK")
