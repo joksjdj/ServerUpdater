@@ -26,6 +26,7 @@ def get_user_input():
         if user_input.lower() == "save":
             print("Edited files to save:", edited_files)
 
+            client = connect_to_server()
             for file_path in edited_files:
 
                 with open(file_path, "rb") as f:
@@ -33,9 +34,9 @@ def get_user_input():
                 file_b64 = base64.b64encode(file_bytes).decode()
                 data_to_send = {"action": "edit", "subaction": None, "path": file_path, "filedata": file_b64}
 
-                client = connect_to_server()
                 client.sendall(json.dumps(data_to_send).encode())
-                client.close()
+
+            client.close()
                 
             edited_files.clear()
 
